@@ -16,8 +16,8 @@ if(ENABLE_ENET)
 
     FetchContent_Declare(
             enetpp
-            GIT_REPOSITORY https://github.com/jseward/enetpp
-            GIT_TAG        4e0133c9f76d0ebabf89d3a51b84728836aeb4aa)
+            GIT_REPOSITORY https://github.com/MattFiler/enetpp
+            GIT_TAG        85cd2c974f931c2f1f01b9638c6deb125139e051)
 
     FetchContent_GetProperties(enetpp)
     if(NOT enetpp_POPULATED)

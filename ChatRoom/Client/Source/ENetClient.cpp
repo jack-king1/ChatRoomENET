@@ -44,12 +44,12 @@ void ENetClient::input()
 
 void ENetClient::connection()
 {
-    //Printer() << "client has CONNECTED.";
+    Printer() << "client has CONNECTED.";
 }
 
 void ENetClient::disconnection()
 {
-   // Printer() << "client has DISCONNECTED.";
+    Printer() << "client has DISCONNECTED.";
 }
 
 void ENetClient::data(const enet_uint8 *data, size_t data_size)
