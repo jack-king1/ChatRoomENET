@@ -1,16 +1,15 @@
 #include <Printer.h>
 #include "Server.h"
 
-
 Server::Server()
 {
-// constructor
+	// constructor
 	enetpp::global_state::get().initialize();
 }
 
 Server::~Server()
 {
-// destructor
+	// destructor
 	network_server.stop_listening();
 	enetpp::global_state::get().deinitialize();
 }
@@ -35,13 +34,10 @@ void Server::initialise()
 
 void Server::run()
 {
-	// while server should not terminate
-	static bool terminate = false;
-
 	auto on_connect = ([&](server_client& client)
 	{
 		Printer() << "client " <<
-				  std::to_string(client.get_id()) <<
+				  std::to_string(client.get_uid()) <<
 				  ": has connected" << std::endl;
 	});
 
@@ -57,7 +53,7 @@ void Server::run()
 		std::string msg(reinterpret_cast<const char*>
 						(data), data_size);
 		Printer() << "client " <<
-				  std::to_string(client.get_id()) << ": " <<
+				  std::to_string(client.get_uid()) << ": " <<
 				  msg;
 		Printer() << std::endl;
 		Printer() << "forwarding msg to all clients\n";
@@ -65,15 +61,17 @@ void Server::run()
 				0,
 				data, data_size, ENET_PACKET_FLAG_RELIABLE,
 				[&](const server_client& destination) {
-					return destination.get_id() != client.get_id();
+					return destination.get_uid() != client.get_uid();
 				});
 	});
-    while (!terminate)
-    {
-        network_server.consume_events(
-                on_connect, on_disconnect, on_data);
-        std::this_thread::sleep_for(
-                std::chrono::milliseconds(1000));
-    }
-}
 
+	// while server should not terminate
+	static bool terminate = false;
+	while (!terminate)
+	{
+		network_server.consume_events(
+				on_connect, on_disconnect, on_data);
+		std::this_thread::sleep_for(
+				std::chrono::milliseconds(1000));
+	}
+}

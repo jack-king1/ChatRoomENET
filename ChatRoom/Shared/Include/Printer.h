@@ -1,7 +1,7 @@
 #pragma once
+
 #include <mutex>
 #include <sstream>
-
 class Printer :
         public std::ostringstream
 {

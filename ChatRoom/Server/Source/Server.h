@@ -3,8 +3,8 @@
 
 struct server_client
 {
-    unsigned int _uid;
-    unsigned int get_id() const { return _uid; }
+	unsigned int _uid;
+	unsigned int get_uid() const { return _uid; }
 };
 
 class Server
@@ -15,10 +15,8 @@ public:
 
 	void initialise();
 	void run();
-
-    enetpp::server<server_client> network_server;
-    unsigned int next_uid = 0;
 	
 private:
-
+	enetpp::server<server_client> network_server;
+	unsigned int next_uid = 0;
 };
