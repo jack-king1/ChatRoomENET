@@ -1,5 +1,6 @@
 #include <Printer.h>
 #include "Server.h"
+#include <ChatMsg.h>
 
 Server::Server()
 {
@@ -47,23 +48,26 @@ void Server::run()
 				  std::to_string(client_uid) << ": has disconnected\n";
 	});
 
-	auto on_data = ([&](server_client& client,
-						const enet_uint8* data, size_t data_size)
-	{
-		std::string msg(reinterpret_cast<const char*>
-						(data), data_size);
-		Printer() << "client " <<
-				  std::to_string(client.get_uid()) << ": " <<
-				  msg;
-		Printer() << std::endl;
-		Printer() << "forwarding msg to all clients\n";
-		network_server.send_packet_to_all_if(
-				0,
-				data, data_size, ENET_PACKET_FLAG_RELIABLE,
-				[&](const server_client& destination) {
-					return destination.get_uid() != client.get_uid();
-				});
-	});
+    auto on_data = ([&](server_client& client,
+                        const enet_uint8* data, size_t data_size)
+    {
+        ChatMsg msg(reinterpret_cast<const char*>(data));
+        Printer()
+                << "client "
+                << std::to_string(client.get_uid())
+                << ": "
+                << msg.getUsername()
+                << "=> "
+                << msg.getMsg();
+        Printer() << std::endl;
+        Printer() << "forwarding msg to all clients\n";
+        network_server.send_packet_to_all_if(
+                0,
+                data, data_size, ENET_PACKET_FLAG_RELIABLE,
+                [&](const server_client& destination) {
+                    return destination.get_uid() != client.get_uid();
+                });
+    });
 
 	// while server should not terminate
 	static bool terminate = false;

@@ -21,7 +21,9 @@ public:
 private:
 	enetpp::client client;
 	std::atomic<bool> exiting = false;
-	std::queue<std::string> msg_queue;
+	//std::queue<std::string> msg_queue;
+    std::queue<ChatMsg> msg_queue;
 	std::mutex msg_queue_mtx;
+	std::string username;
 };
 

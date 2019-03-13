@@ -9,6 +9,11 @@ ENetClient::~ENetClient()
 
 void ENetClient::initialise()
 {
+    Printer() <<
+              "Welcome to the coolest chatroom evz. Fo Sho!\n" <<
+              "Please enter your tag, in'it\n";
+    std::getline(std::cin, username);
+
 	enetpp::global_state::get().initialize();
 	client.connect(enetpp::client_connect_params()
 						   .set_channel_count(1)
@@ -31,13 +36,15 @@ void ENetClient::run()
 
         while (msg_queue.size())
         {
-            std::lock_guard<std::mutex> lock(msg_queue_mtx);
-            const auto &txt = msg_queue.front();
+            std::lock_guard<std::mutex>lock(msg_queue_mtx);
+            const auto& msg = msg_queue.front();
             assert(sizeof(char) == sizeof(enet_uint8));
-            client.send_packet(0,
-                               reinterpret_cast<const enet_uint8 *>(txt.data()),
-                               txt.length(), ENET_PACKET_FLAG_RELIABLE);
+            unsigned int msg_length = 0;
+            auto msg_data = msg.data(msg_length);
             msg_queue.pop();
+            client.send_packet(0,
+                               reinterpret_cast<const enet_uint8*>(msg_data),
+                               msg_length, ENET_PACKET_FLAG_RELIABLE);
         }
 	}
 
@@ -49,9 +56,11 @@ void ENetClient::input() {
 	while (!exiting) {
 		std::string txt;
 		std::getline(std::cin, txt);
-
-		std::lock_guard<std::mutex> lock(msg_queue_mtx);
-		msg_queue.push(std::move(txt));
+		std::time_t result = std::time(nullptr);
+		std::string time_stamp = std::asctime(std::localtime(&result));
+		ChatMsg msg(username, txt, result);
+		std::lock_guard<std::mutex>lock(msg_queue_mtx);
+		msg_queue.push(std::move(msg));
 	}
 }
 
@@ -67,7 +76,7 @@ void ENetClient::disconnection()
 
 void ENetClient::data(const enet_uint8* data, size_t data_size)
 {
-	std::string msg(reinterpret_cast<const char*>
-					(data), data_size);
-	Printer() << msg;
+	ChatMsg msg(reinterpret_cast<const char*>(data));
+	std::string time_stamp = std::asctime(std::localtime(&msg.getStamp()));
+	Printer() << "(" + time_stamp + ")" + msg.getUsername() + ": " + msg.getMsg();
 }
